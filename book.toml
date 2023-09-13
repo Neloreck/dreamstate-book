@@ -1,0 +1,10 @@
+[book]
+authors = ["Neloreck"]
+language = "en"
+multilingual = false
+src = "src"
+title = "Dreamstate book"
+
+[output.html]
+git-repository-url = "https://github.com/Neloreck/dreamstate-book"
+site-url = "/dreamstate-book/"
