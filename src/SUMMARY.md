@@ -3,6 +3,7 @@
 - [General](./general/HOME.md)
 - [Requirements](./general/REQUIREMENTS.md)
 - [How to install](./general/INSTALLATION.md)
+- [Lib details](./general/LIB_DETAILS.md)
 
 - [Dreamstate API]()
   - [Scope](./docs/SCOPE.md)
