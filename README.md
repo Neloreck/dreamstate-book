@@ -5,8 +5,16 @@
 
 Documentation for dreamstate react library.
 
-## 📦 Links
+## Links
 
 - [Dreamstate book](https://neloreck.github.io/dreamstate-book/)
 - [Dreamstate repository](https://github.com/Neloreck/dreamstate)
 - [Dreamstate npm package](https://www.npmjs.com/package/dreamstate)
+
+## Working with the book locally
+
+- Make sure [rust](https://www.rust-lang.org/) is installed
+- [Install cargo mdbook](https://rust-lang.github.io/mdBook/guide/installation.html)
+    - `cargo install mdbook`
+- [Run mdbook locally](https://rust-lang.github.io/mdBook/guide/creating.html)
+    - `mdbook serve --open`

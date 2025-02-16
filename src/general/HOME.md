@@ -8,6 +8,7 @@ Documentation for dreamstate library for react data management.
 - [Why dreamstate?](./BENEFITS.md)
 - [FAQ](./FAQ.md)
 - [Requirements](./REQUIREMENTS.md)
+- [Usage](./USAGE.md)
 - [Examples](../examples/LIST.md)
 
 ## Examples

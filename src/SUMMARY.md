@@ -6,6 +6,8 @@
 
 - [How to install](./general/INSTALLATION.md)
 
+- [Usage](./general/USAGE.md)
+
 - [Lib details](./general/LIB_DETAILS.md)
 
 - [Changes log](./changes/CHANGELOG.md)
