@@ -2,7 +2,7 @@
 
 ### Type
 
-Abstract Class
+Abstract class.
 
 ### About
 
@@ -207,8 +207,7 @@ abstract class ContextManager<
 - **Usage:**  
   Returns a query response if a valid handler is found, or `null` if no handler exists in the current scope.
 
-
-## Usage Example
+### Usage
 
 Below is an example of creating an authentication manager that stores user information and provides
 methods for state mutations:
@@ -247,11 +246,11 @@ export class AuthManager extends ContextManager<IAuthContext> {
 
 To integrate this manager with other context managers, provide it at the application level using Dreamstate's scope:
 
-```tsx
+```typescript
 import { ScopeProvider, createProvider } from "dreamstate";
 // ...
 
-const ApplicationProvider = createProvider([ CustomService, AuthManager ]);
+const ApplicationProvider = createProvider([CustomService, AuthManager]);
 
 export function ApplicationRoot(): ReactElement {
   return (
@@ -266,7 +265,7 @@ export function ApplicationRoot(): ReactElement {
 
 For consuming the context in your components, use the useManager hook:
 
-```tsx
+```typescript
 import { useManager } from "dreamstate";
 // ...
 
@@ -275,7 +274,7 @@ export function SomeNestedComponent(): ReactElement {
 
   return (
     <div>
-      Current user is: { user }
+      Current user is: {user}
     </div>
   );
 }

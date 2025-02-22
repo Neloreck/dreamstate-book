@@ -1,41 +1,46 @@
+# OnQuery
+
 ### Type
+
 Method decorator.
 
 ### About
+
 Marks method as query handler. Every query request with provided type will be handled by service instance method. <br/>
 Services handlers priority is same as instantiation order.
 
 Mainly used to register query requests handlers with generic getter logic that does some job and returns results.
 
 ### Call Signature
-```typescript
-function OnQuery(queryType: TQueryType): MethodDecorator;
-```
 
 ```typescript
-type TQueryType<T extends string = string> = symbol | string | number | T;
-```
+type QueryType<T extends string = string> = symbol | string | number | T;
 
-```typescript
-interface QueryRequest<D extends any = undefined, T extends TQueryType = TQueryType> {
+interface QueryRequest<D extends any = undefined, T extends QueryType = QueryType> {
   type: T;
   data?: D;
 }
+
+@OnQuery(queryType: QueryType): MethodDecorator;
 ```
 
 ### Parameters
+
 - queryType - specific query type to be handled by decorated method
 
 ### Throws
+
 - TypeError : no query type parameter(s) present
 - TypeError : decorated method does not belong to ContextManager class
 
 ### Parameters
+
 - Should be used to mark some service getter methods as query handlers
 - Handlers can be both sync and async
 - Queries should be simple getters without side effects
 
 ### Usage
+
 If few services need some data that should not be observed or handled by another class, but is needed for one-time operation, queries can help. <br/>
 <br/>
 As an example, some service has method that logs some important data.
@@ -45,7 +50,6 @@ It is not important where it is placed and who handles it, only specific data is
 import { QueryResponse, ContextManager } from "dreamstate";
 
 export class LoggingService extends ContextManager {
-
   public logImportantData(): void {
     const information: QueryResponse<string> = this.queryDataSync({ type: "IMPORTANT_DATA" });
 
@@ -55,7 +59,6 @@ export class LoggingService extends ContextManager {
       console.info("Could not get data, no one responded.");
     }
   }
-
 }
 ```
 
@@ -68,12 +71,10 @@ Manager with important data that handles query can look like this:
 import { QueryRequest, OnQuery, ContextManager } from "dreamstate";
 
 export class ImportantDataService extends ContextManager {
-
   @OnQuery("IMPORTANT_DATA")
   public onImportantDataRequested(queryRequest: QueryRequest<void>): string {
     return "Really important data!";
   }
-
 }
 ```
 Or it could be event simple react component:
@@ -98,6 +99,7 @@ export function SomeComponent(): ReactElement {
 So, if instance of ImportantDataService is provided (or component is rendered) by the moment when LoggingService needs some important data, it will respond on the query.
 
 ##### With parameters:
+
 Query parameters can be provided when sending query:
 
 ```typescript
@@ -133,6 +135,7 @@ export class MultiplicationService extends ContextManager {
 ```
 
 ##### Async:
+
 If getter should be async, alternative would look as simple as sync one:
 
 ```typescript

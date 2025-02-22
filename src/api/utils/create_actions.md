@@ -2,7 +2,7 @@
 
 ### Type
 
-Utility function.
+Function.
 
 ### About
 
@@ -25,7 +25,7 @@ function createActions<T extends AnyObject>(actions: T): Readonly<T>;
 
 - **Intention**: this function creates a container that is both visually and programmatically distinguishable
   as a sub-storage for actions. Marking an object as an actions store ensures that it is excluded from
-  the shallow comparisons performed during setContext calls, thereby keeping its reference unchanged across updates.
+  the shallow comparisons performed during setContext calls, thereby keeping its reference unchanged across updates
 
 ### Usage
 

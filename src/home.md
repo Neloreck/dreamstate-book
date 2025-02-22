@@ -64,7 +64,6 @@
 - [Provision query from manager](./examples/provision_from_manager.md)
 - [Query data from component](./examples/query_from_component.md)
 - [Query data from manager](./examples/query_from_manager.md)
-- [Reinit whole scope on HMR](./examples/hmr_reinit_scope.md)
 - [Send signal from component](./examples/signal_from_component.md)
 - [Send signal from manager](./examples/signal_from_manager.md)
 - [Testing components](./examples/testing_components.md)

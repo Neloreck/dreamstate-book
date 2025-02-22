@@ -1,6 +1,8 @@
+# getCurrent
+
 ### Type
 
-Function
+Function.
 
 ### About
 
@@ -27,7 +29,7 @@ For example, I want to get auth manager instance in scope and test some method:
 
 ```typescript
 const scope: ScopeContext = mockScope();
-const map: ManagerInstanceMap = mockManagers([ TestManager ], null, scope);
+const map: ManagerInstanceMap = mockManagers([TestManager], null, scope);
 
 expect(map.get(TestManager)).toBeInstanceOf(TestManager);
 expect(map.get(ExtendingManager)).toBeUndefined();

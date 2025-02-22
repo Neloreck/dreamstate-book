@@ -1,46 +1,57 @@
+# ScopeProvider
+
 ### Type
+
 React component.
 
 ### About
-Dreamstate scope provider component. <br/>
-Makes sure signaling and context managers are isolated under this specific provider. <br/>
-Once scope unmounts, managers under it should stop working and free RAM. <br/>
-<br/>
-Scope gives access to current managers states, signaling and queries context and methods.
 
-### Method signature
-```typescript
-function ScopeProvider(props: =ScopeProviderProps): ReactElement;
-```
+The `ScopeProvider` component is responsible for isolating the Dreamstate [scope](./scope.md).  
+It ensures that signaling, context managers, and queries operate within a specific provider instance.  
+When a `ScopeProvider` unmounts, all associated managers stop working, freeing up memory.
+
+This component provides access to the current state of managers, as well as signaling and query methods.
+
+### Method Signature
 
 ```typescript
 export interface ScopeProviderProps {
   children?: ReactNode;
 }
+
+function ScopeProvider(
+  props: ScopeProviderProps
+): ReactElement;
 ```
 
-### Parameters
-- Simple scope provider for dreamstate context isolation
-- All signals and queries are working strictly under the scope
-- Another scope below another scope takes priority and isolates everything in tree below
-- Make sure ScopeProvider is rendering above managers providers
+### Props
 
-### Usage
-Application providers and consumers should be wrapped with ScopeProvider in order to work correctly. <br/>
-Typically one provider component exists that wraps application with scope and managers providers. <br/>
-As an example:
+- **props.children**: React nodes that will be wrapped by the ScopeProvider
+
+### Notes
+
+- Provides a dedicated Dreamstate scope for context isolation
+- Signals and queries function strictly within the given scope
+- Nested ScopeProvider instances create isolated sub-scopes, preventing cross-scope interference
+- ScopeProvider should always be rendered above any context manager providers.
+
+## Usage:
+
+To enable Dreamstate's functionality, wrap your application's providers and consumers with ScopeProvider.
+Typically, a single ScopeProvider is used at the root level of the application.
+
 ```typescript
 import { createProvider, ScopeProvider } from "dreamstate";
+// ... other imports ...
 
-/**
- * Application managers provider.
- */
-const StoreProvider = createProvider([ SampleManager ]);
+const StoreProvider = createProvider([SampleManager]);
 
-export function ApplicationProvider({ children }: PropsWithChildren<Record<string, unknown>>): ReactElement {
+export function ApplicationProvider({
+  children
+}: PropsWithChildren<Record<string, unknown>>): ReactElement {
   return (
     <ScopeProvider>
-      <StoreProvider>{ children }</StoreProvider>
+      <StoreProvider>{children}</StoreProvider>
     </ScopeProvider>
   );
 }

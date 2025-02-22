@@ -2,7 +2,7 @@
 
 ### Type
 
-Function
+Function.
 
 ### About
 
@@ -66,7 +66,7 @@ React's useContext). To observe only specific fields and avoid unnecessary re-re
 export function SomeComponent(): ReactElement {
   const { username } = useManager(
     AuthManager,
-    ({ username }: IAuthContext) => [ username ]
+    ({ username }: IAuthContext) => [username]
   );
   
   // ... component logic

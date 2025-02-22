@@ -51,7 +51,7 @@ export const Provider = createProvider(SimpleManager);
 
 Wrap your application (or a portion of it) with the provider to make the manager's context available to all child components.
 
-```tsx
+```typescript
 import { ScopeProvider } from "dreamstate";
 import React, { ReactElement } from "react";
 
@@ -73,7 +73,7 @@ export function Application(): ReactElement {
 
 Later you can access your manager context data from component and call manager actions in hooks/event handlers.
 
-```tsx
+```typescript
 import { useManager } from "dreamstate";
 import React, { ReactElement } from "react";
 

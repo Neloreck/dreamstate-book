@@ -2,7 +2,7 @@
 
 ### Type
 
-Utility function.
+Function.
 
 ### About
 

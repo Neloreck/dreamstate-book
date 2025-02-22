@@ -1,105 +1,172 @@
+# ScopeContext
+
 ### Type
+
 Object interface.
 
 ### About
-Interface describing current dreamstate scope methods and data. <br/>
-All active providers, managers, signals and queries are acting in context of current scope and do not function out of it. <br/>
-Usage of current scope can give you access to some specific methods to work with it.
+
+The `ScopeContext` interface describes the methods and data available within the current Dreamstate scope.
+All active providers, managers, signals, and queries operate within this scope and do not function outside of it.
+Accessing the scope allows you to work with specialized methods for signal handling, query processing,
+and context management.
 
 ### Interface signature
+
 ```typescript
-interface ScopeContext {
+export interface ScopeContext {
+  INTERNAL: ScopeContextInternals;
 
-  /**
-   * Lib internals.
-   * Should not be used normally except unit testing.
-   */
-  INTERNAL: IScopeContextInternals;
+  getContextOf<
+    T extends AnyObject,
+    D extends ContextManagerConstructor<T>
+  >(
+    manager: D
+  ): T;
 
-  /**
-   * Get current context snapshot for provided manager class.
-   *
-   * @param {TAnyContextManagerConstructor} manager - manager which context will be returned
-   */
-  getContextOf<T extends TAnyObject, D extends IContextManagerConstructor<T>>(manager: D): T;
+  emitSignal<
+    D = undefined
+  >(
+    base: BaseSignal<D>,
+    emitter?: AnyContextManagerConstructor | null
+  ): SignalEvent<D>;
 
-  /**
-   * Emit signal for all subscribers in current dreamstate scope.
-   *
-   * @param {Object} base - base signal that should trigger signal event for subscribers.
-   * @param {TSignalType} base.type - signal type.
-   * @param {*=} base.data - signal data that will be received by subscribers.
-   * @param {(TAnyContextManagerConstructor | null)=} emitter - signal emitter reference.
-   * @returns {Promise} promise that resolves after all handlers execution.
-   */
-  emitSignal<D = undefined>(base: IBaseSignal<D>, emitter?: TAnyContextManagerConstructor | null): ISignalEvent<D>;
+  subscribeToSignals<
+    D = undefined
+  >(
+    listener: SignalListener<D>
+  ): TCallable;
 
-  /**
-   * Subscribe to signals in current scope.
-   * Following callback will be triggered on each signal with signal event as first parameter.
-   *
-   * @param {TSignalListener} listener - signals listener callback.
-   * @returns {TCallable} unsubscribing function.
-   */
-  subscribeToSignals<D = undefined>(listener: TSignalListener<D>): TCallable;
+  unsubscribeFromSignals<
+    D = undefined
+  >(
+    listener: SignalListener<D>
+  ): void;
 
-  /**
-   * Unsubscribe provided callback from signals in current scope.
-   * Following callback will not be triggered on scope signals anymore.
-   *
-   * @param {TSignalListener} listener - signals listener callback.
-   */
-  unsubscribeFromSignals<D = undefined>(listener: TSignalListener<D>): void;
+  registerQueryProvider<
+    T extends QueryType
+  >(
+    queryType: T,
+    listener: QueryListener<T, AnyValue>
+  ): TCallable;
 
-  /**
-   * Register callback as query provider and answer query data calls with it.
-   *
-   * @param {TQueryType} queryType - type of query for data provisioning.
-   * @param {TQueryListener} listener - callback that will listen data queries and return evaluation data.
-   * @returns {TCallable} function that unsubscribes provided callback.
-   */
-  registerQueryProvider<T extends TQueryType>(queryType: T, listener: TQueryListener<T, any>): TCallable;
+  unRegisterQueryProvider<
+    T extends QueryType
+  >(
+    queryType: T,
+    listener: QueryListener<T, AnyValue>
+  ): void;
 
-  /**
-   * Unregister callback as query provider and answer query data calls with it.
-   *
-   * @param {TQueryType} queryType - type of query for data provisioning.
-   * @param {TQueryListener} listener - callback that will be unsubscribed from listening.
-   */
-  unRegisterQueryProvider<T extends TQueryType>(queryType: T, listener: TQueryListener<T, any>): void;
+  queryDataSync<
+    D,
+    T extends QueryType,
+    Q extends OptionalQueryRequest<D, T>
+  >(
+    query: Q
+  ): QueryResponse<AnyValue>;
 
-  /**
-   * Query data from current scope in a sync way.
-   * Handler that listen for provided query type will be executed and return value will be wrapped
-   * and returned as QueryResponse.
-   * Mainly used to get specific data in current context or receive current state of specific data without direct
-   * referencing to it.
-   *
-   * @param {IOptionalQueryRequest} query - optional query request base for data retrieval, includes query type and
-   *  optional data field.
-   * @returns {TQueryResponse} response for provided query or null value if no handlers were found.
-   */
-  queryDataSync<D extends any, T extends TQueryType, Q extends IOptionalQueryRequest<D, T>>(query: Q): TQueryResponse<any>;
-
-  /**
-   * Query data from current scope in an sync way.
-   * Handler that listen for provided query type will be executed and return value will be wrapped
-   * and returned as QueryResponse.
-   * Mainly used to get specific data in current context or receive current state of specific data without direct
-   * referencing to it.
-   *
-   * @param {IOptionalQueryRequest} query - optional query request base for data retrieval, includes query type and
-   *  optional data field.
-   * @returns {Promise} response for provided query or null value if no handlers were found.
-   */
-  queryDataAsync<D extends any, T extends TQueryType, Q extends IOptionalQueryRequest<D, T>>(query: Q): Promise<TQueryResponse<any>>;
-
+  queryDataAsync<
+    D,
+    T extends QueryType,
+    Q extends OptionalQueryRequest<D, T>
+  >(
+    query: Q
+  ): Promise<TQueryResponse<TAnyValue>>;
 }
 ```
 
-### Parameters
-- Scope is created automatically by dreamstate ScopeProvider or can be mocked for tests
-- Scope is used to isolate application from other components and store all the data in it instead of globals
-- Scope is environment where signals and queries are processed
-- Scope can be accessed by react components to work with signals and queries
-- Scope can be accessed to test or mock some data
+### Notes
+
+- **Scope creation**: the scope is automatically created by the Dreamstate ScopeProvider and can
+  also be mocked for testing purposes
+- **Isolation**: the scope isolates the application from external components, storing all relevant data within
+  its context instead of using global state
+- **Signal and Query Processing**: all signals and queries are processed within the scope, ensuring
+  that only components within the same scope interact with each other
+- **Component Access**: React components can access the scope to work with signals and queries,
+  facilitating efficient data management and communication
+- **Testing and Mocking**: The scope can be accessed directly for testing or mocking purposes,
+  providing flexibility during development and unit testing
+
+## Fields
+
+### INTERNAL
+- **Type:** `IScopeContextInternals`
+- **Description:**  
+  Contains library internals. This field is not intended for regular use and is primarily available for
+  unit testing and debugging purposes.
+
+## Methods
+
+### getContextOf
+
+- **Description**:
+  Retrieves the current context snapshot for the specified manager class.
+- **Usage**:
+  Use this method to access the state managed by a specific ContextManager within the current scope.
+- **Returns**:
+  Context of manager class if it is provided or default context value.
+
+### emitSignal
+
+- **Description**:
+  Emits a signal for all subscribers within the current Dreamstate scope.
+- **Parameters**:
+  - base: The base signal object that contains a type and an optional data field.
+  - emitter (optional): The reference of the signal emitter.
+- **Returns**:
+  A signal event instance that wraps the emitted signal.
+
+### subscribeToSignals
+
+- **Description**:
+  Subscribes a listener to signal events within the current scope. The listener is invoked on each signal event.
+- **Parameters**:
+  - listener: A callback function that handles signal events.
+- **Returns**:
+  A callable function that, when invoked, unsubscribes the listener.
+
+### unsubscribeFromSignals
+
+- **Description**:
+  Unsubscribes the specified listener from signal events within the current scope.
+- **Parameters**:
+  - listener: The callback function to remove from the subscription list.
+
+### registerQueryProvider
+
+- **Description**:
+  Registers a query provider callback that will answer query data requests for the specified query type.
+- **Parameters**:
+  - queryType: The type of query for which the provider will supply data.
+  - listener: The callback that processes queries and returns the required data.
+- **Returns**:
+  A callable function to unregister the query provider when invoked.
+
+### unRegisterQueryProvider
+
+- **Description**:
+  Unregisters a previously registered query provider callback so that it no longer handles query data requests.
+- **Parameters**:
+  - queryType: The type of query for which the provider was registered.
+  - listener: The callback to be unregistered.
+
+### queryDataSync
+
+- **Description**:
+  Synchronously queries data from the current scope. The handler for the specified query type is executed and its
+  result is wrapped as a query response.
+- **Parameters**:
+  - query: An object representing the query request, including the query type and an optional data field.
+- Returns:
+  A query response object if a valid handler is found, or null if no handler exists.
+
+### queryDataAsync
+
+- Description:
+  Asynchronously queries data from the current scope. The handler for the specified query type is executed,
+  and its result is returned as a promise that resolves with a query response.
+- Parameters:
+  - query: An object representing the query request, including the query type and an optional data field.
+- Returns:
+  A promise that resolves with the query response if a valid handler is found, or null if no handler exists.

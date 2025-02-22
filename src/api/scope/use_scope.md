@@ -1,21 +1,32 @@
+# useScope
+
 ### Type
+
 Function.
 
 ### About
-Utility for consumption of current dreamstate scope. <br/>
-Returns [scope context](https://github.com/Neloreck/dreamstate/wiki/ScopeContext) object or null, if no scope provided. <br/>
+
+The `useScope` hook provides access to the current Dreamstate scope.  
+It returns a [`ScopeContext`](./scope_context.md) object or `null` if no scope is available.
+
+Scope enables interaction with context managers, signals, and queries without triggering unnecessary re-renders.
 
 ### Call Signature
+
 ```typescript
 function useScope(): ScopeContext;
 ```
 
 ### Returns
-- 'ScopeContext' - current dreamstate scope, if it is provided. Scope never updates and is constant reference.
-- Scope can be regenerated with HMR code updates.
+
+ScopeContext – The current Dreamstate scope, if available.
+The returned scope is a constant reference and does not update.
+It can be regenerated with Hot Module Replacement updates.
 
 ### Usage
-Scope context can be used to get current manager value without effect updating every time:
+
+Using `useScope` allows retrieving manager values without triggering effects on every update:
+
 ```typescript
 export function SomeComponent(): ReactElement {
   const scope: ScopeContext = useScope();
@@ -24,59 +35,57 @@ export function SomeComponent(): ReactElement {
   useEffect(() => {
     return scope.subscribeToSignals(() => {
       const someContext: ISomeContext = scope.getContextOf(SomeContextManager);
-      // ...
+      // Handle the retrieved context...
     });
   }, [scope]);
 
-  ...
-  ...
-  ...
+  return <div>content</div>;
 }
 ```
 
-Scope context can be used to emit signals:
+Signals can be dispatched to notify subscribers in the current scope:
+
 ```typescript
 export function SomeComponent(): ReactElement {
   const scope: ScopeContext = useScope();
 
-  const onClick = useCallback(() => scope.emitSignal({ type: "SOME_SIGNAL" }), []);
+  const onClick = useCallback(() => {
+    scope?.emitSignal({ type: "SOME_SIGNAL" });
+  }, [scope]);
 
-  ...
-  ...
-  ...
+  return <button onClick={onClick}>Emit Signal</button>;
 }
 ```
 
-Scope can be used to register custom query providers:
+A component can register itself as a provider for specific queries:
+
 ```typescript
 export function SomeComponent(): ReactElement {
   const scope: ScopeContext = useScope();
 
-  // Manager updates will not trigger effect every time, but we still have access to latest context values:
   useEffect(() => {
     return scope.registerQueryProvider("SOME_QUERY_TYPE", () => "some_query_response");
   }, [scope]);
 
-  ...
-  ...
-  ...
+  return <div>Query provider active</div>;
 }
 ```
 
-Scope can be used to query custom data from scope:
+Data queries can be executed synchronously within the current scope:
+
 ```typescript
 export function SomeComponent(): ReactElement {
-    const scope: ScopeContext = useScope();
-    const [state, setState] = useState(0);
+  const scope: ScopeContext = useScope();
+  const [state, setState] = useState(0);
 
-    const onClick = useCallback(() => {
-      const response: QueryResponse<number> = scope.queryDataSync({ type: "SOME_NUMBER" });
+  const onClick = useCallback(() => {
+    const response: QueryResponse<number> | null = scope.queryDataSync({ type: "SOME_NUMBER" });
 
+    if (response) {
       setState(response.data);
-    }, [scope]);
+    }
+  }, [scope]);
 
-...
-...
-...
+  return <button onClick={onClick}>Query data</button>;
 }
 ```

@@ -1,6 +1,8 @@
+# mockScopeProvider
+
 ### Type
 
-Item type.
+Function.
 
 ### About
 

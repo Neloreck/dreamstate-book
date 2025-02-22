@@ -2,7 +2,7 @@
 
 ### Type
 
-Function
+Function.
 
 ### About
 
@@ -58,12 +58,12 @@ supports an initialState property for initializing context.
 
 For example, to provide context services with a pre-calculated initial state:
 
-```tsx
+```typescript
 // Create the provider as a static value, should not be inside a render function.
 const RootProvider: FunctionComponent = createProvider([
   AuthContextManager,
   MediaContextManager,
-  SomeService
+  SomeService,
 ]);
 
 const initialState = { a: 1, b: 2 };
@@ -71,7 +71,7 @@ const initialState = { a: 1, b: 2 };
 function SampleComponent(): ReactElement {
   return (
     <RootProvider initialState={initialState}>
-      <ApplicationRouter />
+      <ApplicationRouter/>
     </RootProvider>
   );
 }
