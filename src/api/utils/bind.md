@@ -1,3 +1,5 @@
+# Bind
+
 ### Type
 
 Class method decorator.

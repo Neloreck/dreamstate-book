@@ -9,7 +9,6 @@
 - [Requirements](requirements.md)
 - [Usage](usage.md)
 - [Changelog](changelog.md)
-- [Examples](examples.md)
 
 ## API
 
@@ -24,8 +23,8 @@
     - [useManager](api/data_management/use_manager.md)
 
   - Signaling / Queries
-    - [@OnSignal](api/scope_signalling/on_signal.md)
     - [@OnQuery](api/scope_signalling/on_query.md)
+    - [@OnSignal](api/scope_signalling/on_signal.md)
 
   - Utils
     - [@Bind](api/utils/bind.md)
@@ -55,16 +54,19 @@
 #### Usage:
 
 - [Checking manager disposal status](./examples/checking_disposal_status.md)
-- [Decoupling managers](./examples/decoupling_managers.md)
+- [Decoupling managers logics](./examples/decoupling_managers.md)
+- [Dynamic manager provision](./examples/dynamic_manager_provision.md)
 - [Forcing manager update](./examples/forcing_manager_update.md)
 - [Getting manager scope](./examples/getting_manager_scope.md)
 - [Listen signals from component](./examples/listen_from_component.md)
+- [Providing initial state](./examples/providing_initial_state.md)
 - [Provision query from component](./examples/accessing_scope.md)
 - [Provision query from manager](./examples/provision_from_manager.md)
 - [Query data from component](./examples/query_from_component.md)
 - [Query data from manager](./examples/query_from_manager.md)
+- [Reinit whole scope on HMR](./examples/hmr_reinit_scope.md)
 - [Send signal from component](./examples/signal_from_component.md)
-- [Send signal from manager](./examples/signal_from_component.md)
+- [Send signal from manager](./examples/signal_from_manager.md)
 - [Testing components](./examples/testing_components.md)
 - [Testing managers](./examples/testing_managers.md)
 - [Using default context value](./examples/default_context_value.md)

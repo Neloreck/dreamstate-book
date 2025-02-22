@@ -1,3 +1,5 @@
+# createComputed
+
 ### Type
 
 Utility function.

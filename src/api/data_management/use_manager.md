@@ -1,61 +1,84 @@
+# useManager
+
 ### Type
-Function.
+
+Function
 
 ### About
-Utility for consumption of ContextManagers. <br/>
 
- - React hook
- - Same as React useContext (alias), but for ContextManager
- - Additionally allows providing of memo selector as second argument
- - Second parameter is optional function that returns array of required props from context
+`useManager` is a hook for consuming ContextManagers. It serves as a specialized alias for
+React's `useContext`, tailored for use with ContextManagers. Additionally, it accepts an optional memo selector
+function that returns an array of observed dependencies, allowing optimized re-rendering
+based on specific context properties.
 
 ### Call Signature
+
 ```typescript
-function useManager<S extends object, M extends IContextManagerConstructor<S>>(
+function useManager<
+  S extends AnyObject,
+  M extends ContextManagerConstructor<S>
+>(
   Manager: M,
   depsSelector?: (context: S) => Array<any>
 ): S;
 ```
 
 ### Parameters
-  - Manager - class extending context manager reference to consume in current component
-  - depsSelector - optional callback for diff checking before update, returns array of observed dependencies
+
+- **Manager**: The class reference of the ContextManager to consume within the current component scope
+- **depsSelector** (optional): A callback function that extracts an array of dependencies from the context.
+  This selector is used for diff checking to optimize re-rendering by triggering updates only
+  when the specified dependencies change
 
 ### Returns
-  - 'context' value of existing ContextManager class in current scope
+
+The current context value provided by the specified ContextManager in the active scope or value declared in static
+gedDefaultContext method. If static method was not overrode in manager class, returns `null`.
 
 ### Throws
-  - TypeError : a supplied parameter is not instance of ContextManager
 
-### Parameters
-  - Provide selector callback as second parameter for big contexts and rendering optimization
-  - Consume manager in parameters as default value - it will be easier to test component later
+- **TypeError**: Thrown if the supplied parameter is not an instance of a ContextManager
+
+### Notes
+
+- Using a selector callback as the second parameter can help optimize rendering in components that consume large contexts
+  by focusing updates on only the necessary fields
+- Supplying the manager as a default parameter makes the component easier to test, as it allows you to mock the context
+  without wrapping the component in a Context.Provider. Also it can help to visually distinguish internal component
+  hooks and subscription to managers
 
 ### Usage
-For example, we should load context for AuthContextManager:
+
+For example, to consume context provided by AuthManager:
 
 ```typescript
 export function SomeComponent(): ReactElement {
-  const { username } = useManager(AuthContextManager);
-
-  ...
-  ...
-  ...
+  const { username } = useManager(AuthManager);
+  
+  // ... component logic and rendring
 }
 ```
 
-Same problem as with default context: every update of auth context will trigger rendering of our component. That's how useContext from react behaves. <br/>
-If we want to observe only one field and ignore updates of other parameters, we should supply memo selector:
+By default, every update to the auth context will trigger a re-render of the component (as is typical with
+React's useContext). To observe only specific fields and avoid unnecessary re-renders, supply a memo selector:
+
+```typescript
+export function SomeComponent(): ReactElement {
+  const { username } = useManager(
+    AuthManager,
+    ({ username }: IAuthContext) => [ username ]
+  );
+  
+  // ... component logic
+}
+```
+
+Variant with props:
 
 ```typescript
 export function SomeComponent({
+  authContext: { username } = useManager(AuthManager)
 }): ReactElement {
-  const { username } = useManager(AuthContextManager, ({ username }: IAuthContext) => [ username ]);
-
-  ...
-  ...
-  ...
+  // ... component logic and rendring
 }
 ```
-
-Default props usage for hook declaration makes component easier to test - you will not need to create Context.Provider before rendering of your component because it can be mocked with props parameter.

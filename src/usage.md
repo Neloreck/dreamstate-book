@@ -96,3 +96,7 @@ export function ExampleComponent({
   );
 }
 ```
+
+## Advanced usage
+
+For advanced usage check API documentation and examples sections in doc book.

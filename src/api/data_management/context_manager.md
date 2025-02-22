@@ -1,155 +1,217 @@
+# ContextManager
+
 ### Type
 
-Abstract class.
+Abstract Class
 
 ### About
 
-Core abstract class for application data management. <br/>
-Should be extended by application store managers. <br/>
-* To provide specific ContextManager classes in react tree, see 'createProvider' method.
-* To consume specific ContextManager data in react tree, see 'useManager' method.
-* To get more details about shallow check on context updates, see 'createNested', 'createActions' and other utility methods.
+`ContextManager` is the core abstract class for managing application data in Dreamstate. It should be extended
+by your application store managers to encapsulate state, handle updates, emit signals, and process queries.
 
-### Class signature
+- To provide specific `ContextManager` classes into the React tree, see the [createProvider](./create_provider.md) method
+- To consume data from a specific `ContextManager` in the React tree, see the [useManager](./use_manager.md) hook
+- For detailed information on how shallow comparisons are performed during context updates, refer to utility
+  methods like [createNested](../utils/create_nested.md), [createActions](../utils/create_actions.md), and others
+
+### Class Signature
+
 ```typescript
-declare abstract class ContextManager<T extends TAnyObject, S extends TAnyObject> {
+abstract class ContextManager<
+  T extends AnyObject,
+  S extends AnyObject
+> {
+  public static get REACT_CONTEXT(): Context<T>;
 
-    /**
-     * React context getter.
-     * Method allows to get related React.Context for manual renders or testing.
-     * Lazy initialization, even for static resolving before anything from ContextManager is used.
-     */
-    public static get REACT_CONTEXT(): Context<T>;
+  public static getDefaultContext(): AnyObject | null
 
-    /**
-     * Flag indicating whether current manager is still working or disposed.
-     * Once manager is disposed, it cannot be reused or continue working.
-     * Scope related methods (signals, queries) will not be visible, usage of scope related methods will throw exceptions.
-     */
-    public IS_DISPOSED: boolean = false;
+  public IS_DISPOSED: boolean;
 
-    /**
-     * Manager instance context.
-     * Generic field that will be synchronized with react providers when 'setContext' method is called.
-     * Should be object value.
-     *
-     * Manual nested values fields mutations are allowed, but not desired.
-     * After calling setContext it will be shallow compared with already provided context before react tree syncing.
-     * Meta fields created by dreamstate utils (createActions, createNested etc)
-     *   may have different comparison instead of shallow check.
-     * 
-     * If you need more details about shallow check, see 'createNested', 'createActions' and other methods.
-     */
-    public context: T;
+  public context: T;
 
-    /**
-     * Generic context manager constructor.
-     * Initial state can be used as some initialization value or SSR provided data.
-     * Treating it as optional value can help to write more generic and re-usable code because manager can be
-     * provided in a different place with different initial state.
-     *
-     * @param initialState - initial state received from dreamstate Provider component properties.
-     */
-    public constructor(initialState?: S);
+  public constructor(initialState?: S);
 
-    /**
-     * Forces update and render of subscribed components.
-     * Just in case when you need forced update to keep everything in sync with your context.
-     *
-     * Side effect: after successful update all subscribed components will be updated accordingly to their subscription.
-     *
-     * Note: it will only force update of provider, components that use useManager selectors will not be forced to render.
-     * Note: creates new shallow copy of 'this.context' reference after each call.
-     * Note: if manager is out of scope, it will simply replace 'this.context'.
-     */
-    public forceUpdate(): void;
+  public onProvisionStarted(): void;
 
+  public onProvisionEnded(): void;
 
-    /**
-     * Update current context from partially supplied state or functional selector.
-     * Updates react providers tree only if 'shouldObserversUpdate' check has passed and anything has changed in store.
-     * Has same philosophy as 'setState' of react class components.
-     *
-     * Side effect: after successful update all subscribed components will be updated accordingly to their subscription.
-     *
-     * Note: partial context is needed or callback that returns partial context.
-     * Note: it will only update provider, components that use useManager selectors will not be forced to render.
-     * Note: if manager is out of scope, it just rewrites 'this.context' object without side effects.
-     *
-     * @param {Object|Function} next - part of context that should be updated or context transformer function.
-     *   In case of functional callback, it will be executed immediately with 'currentContext' parameter.
-     */
-    public setContext(next: Partial<T> | TPartialTransformer<T>): void;
+  public getScope(): ScopeContext;
 
-    /**
-     * Emit signal for other managers and subscribers in current scope.
-     * Valid signal types: string, number, symbol.
-     *
-     * @throws {Error} - manager is out of scope.
-     *
-     * @param {Object} baseSignal - signal base that contains basic descriptor of emitting signal.
-     * @param {TSignalType} baseSignal.type - signal type.
-     * @param {*=} baseSignal.data - optional signal data.
-     * @returns {Promise} promise that will be resolved after signal listeners call.
-     */
-    public emitSignal<D = undefined>(baseSignal: IBaseSignal<D>): void;
+  public forceUpdate(): void;
 
-    /**
-     * Send context query to retrieve data from query handler methods.
-     * Async method is useful when provider is async. Sync providers still will be handled correctly.
-     * Will return query response packed object in case if valid handler is found in scope.
-     * Will return null in case if no valid handler found in current scope.
-     *
-     * @param {Object} queryRequest - query request base.
-     * @param {TQueryType} queryRequest.type - query type.
-     * @param {*=} queryRequest.data - optional query data, some kind of getter params.
-     * @return {Promise<null | TQueryResponse<*>>} result of query search or null, if no providers in current scope.
-     */
-    public queryDataAsync<D extends any, T extends TQueryType, Q extends IOptionalQueryRequest<D, T>>(queryRequest: Q): Promise<TQueryResponse<any>>;
+  public setContext(next: Partial<T> | PartialTransformer<T>): void;
 
-    /**
-     * Send context query to retrieve data from query handler methods.
-     * Sync method is useful when provider is sync. Async providers will return promise in a data field.
-     * Will return query response packed object in case if valid handler is found in scope.
-     * Will return null in case if no valid handler found in current scope.
-     *
-     * @param {Object} queryRequest - query request base.
-     * @param {TQueryType} queryRequest.type - query type.
-     * @param {*=} queryRequest.data - optional query data, some kind of getter params.
-     * @return {null | TQueryResponse<*>} result of query search or null, if no providers in current scope.
-     */
-    public queryDataSync<D extends any, T extends TQueryType, Q extends IOptionalQueryRequest<D, T>>(queryRequest: Q): TQueryResponse<any>;
+  public emitSignal<D = undefined>(baseSignal: BaseSignal<D>): void;
 
-    /**
-     * Lifecycle method.
-     * First provider was injected into react tree.
-     * Same philosophy as 'componentWillMount' for class-based components.
-     *
-     * Useful for data initialization and subscriptions creation.
-     */
-    protected onProvisionStarted(): void;
+  public queryDataAsync<
+    D extends AnyValue,
+    T extends QueryType,
+    Q extends OptionalQueryRequest<D, T>
+  >(
+    queryRequest: Q
+  ): Promise<TQueryResponse<AnyValue>>;
 
-    /**
-     * Lifecycle method.
-     * Last provider was removed from react tree.
-     * Same philosophy as 'componentWillUnmount' for class-based components.
-     *
-     * Useful for data disposal when context is being ejected/when HMR happens.
-     */
-    protected onProvisionEnded(): void;
-
+  public queryDataSync<
+    D extends AnyValue,
+    T extends QueryType,
+    Q extends OptionalQueryRequest<D, T>>(
+    queryRequest: Q
+  ): TQueryResponse<any>;
 }
-
 ```
 
-### Parameters
-  - Avoid heavy constructor logic/subscriptions, use it for sync initialization of class fields
-  - Context managers should start working on provision start event and should cleanup everything on provision end event
-  - Avoid creation of deeply nested object in stores, flatter fields are easier to maintain
-  - It is easier to maintain HMR updates while developing if managers are modular, cleaning all the data on provision end and do not rely on current environment
+## Notes
 
-### Usage
-For example, if you need to create auth manager that stores information about current user and provides few methods for mutations:
+- Constructor best practices:
+  - Avoid heavy logic or subscriptions in the constructor; use it primarily for synchronous initialization of class fields
+- Lifecycle management:
+  - Context managers should begin operations on the provision start event and perform cleanup on the provision end event
+- State organization:
+  - Avoid creating deeply nested objects in stores; flatter state structures are easier to maintain
+- Hot module replacement:
+  - Managers should be modular. Clean all data on provision end and avoid reliance on the current environment for easier
+    HMR updates during development
+
+## Static methods and properties
+
+### getDefaultContext
+
+- **Description:**  
+  Returns the default React context value. This method provides a placeholder value for context consumers when no
+  specific manager is provided.
+- **Return type:** `AnyObject | null`
+- **Notes:** 
+  Defaults to `null` if no custom default is specified.
+
+### REACT_CONTEXT
+
+- **Description:**  
+  Retrieves the associated React context for the current `ContextManager`. This context is lazily initialized and is
+  useful for manual rendering or testing.
+- **Return Type:** `Context<AnyValue>`
+- **Notes:**  
+  Throws an error if accessed directly on the base `ContextManager` class, as direct references to
+  ContextManager statics are forbidden.
+
+## Instance fields
+
+### IS_DISPOSED
+
+- **Description:**  
+  A flag that indicates whether the manager is still active or has been disposed.  
+  Once disposed, the manager cannot be reused, and scope-related methods (signals, queries)
+  will throw exceptions if used.
+- **Type:** `boolean`
+- **Default Value:** `false`
+
+### context
+
+- **Description:**  
+  Stores the current state of the manager. This field is synchronized with React providers via `setContext`.  
+  It should always be an object, and while nested field mutations are possible, they are not recommended.
+- **Type:** `T`
+- **Notes:**  
+  Meta fields (e.g., created by `createActions` or `createNested`) may use a different comparison mechanism than the standard shallow check.
+
+## Constructor
+
+### constructor(initialState?: S)
+
+- **Description:**  
+  Initializes a new instance of the `ContextManager` with an optional initial state.  
+  This initial state may be used for synchronous initialization or provided from SSR.
+- **Parameters:**
+  - `initialState` (optional): The initial state used to set up the manager.
+- **Notes:**  
+  Calls `processComputed` on the context to ensure that computed fields are calculated before the manager is provisioned.
+
+## Instance Methods
+
+### onProvisionStarted
+
+- **Description:**  
+  Lifecycle method invoked when the first provider is injected into the React tree.  
+  It is analogous to `componentWillMount` in class-based components.
+- **Usage:**  
+  Used for data initialization and setting up subscriptions.
+- **Return Type:** `void`
+
+### onProvisionEnded
+
+- **Description:**  
+  Lifecycle method called when the last provider is removed from the React tree.  
+  It functions similarly to `componentWillUnmount`.
+- **Usage:**  
+  Ideal for cleanup tasks such as disposing of data and unsubscribing from events, especially during
+  hot module replacement (HMR) or dynamic managers provision.
+- **Return Type:** `void`
+
+### getScope
+
+- **Description:**  
+  Retrieves the current manager scope, which contains methods for managing context and retrieving manager instances.
+- **Return Type:** `ScopeContext`
+- **Throws:**  
+  Throws an error if the manager is out of scope.
+
+### forceUpdate
+
+- **Description:**  
+  Forces an update and re-render of subscribed components by creating a new shallow copy of the current context.  
+  This ensures that updates are propagated to the provider.
+- **Usage:**  
+  Useful for ensuring that all subscribers are updated when necessary.
+- **Return Type:** `void`
+- **Notes:**  
+  Only forces an update of the provider; components using `useManager` selectors will not be forced to re-render.
+
+### setContext
+
+- **Description:**  
+  Updates the current context using a partial state object or a functional selector.  
+  It performs a shallow comparison with the existing context and updates the provider only if changes are detected.
+- **Parameters:**
+  - `next`: A partial context object or a function that returns a partial context.
+- **Return Type:** `void`
+
+### emitSignal
+
+- **Description:**  
+  Emits a signal to other managers and subscribers within the current scope.  
+  A signal includes a type and optional data.
+- **Parameters:**
+  - `baseSignal`: An object containing a signal type and optional data.
+- **Return Type:** `SignalEvent<D>`
+- **Throws:**  
+  Throws an error if the manager is out of scope.
+
+### queryDataAsync
+
+- **Description:**  
+  Sends an asynchronous query to retrieve data from query handler methods.  
+  Particularly useful for async providers.
+- **Parameters:**
+  - `queryRequest`: An object containing the query type and optional data.
+- **Return Type:** `Promise<QueryResponse<AnyValue>>`
+- **Usage:**  
+  Resolves with a query response object if a valid handler is found, or `null` if not.
+
+### queryDataSync
+
+- **Description:**  
+  Sends a synchronous query to retrieve data from query handler methods.  
+  Ideal for synchronous providers; async providers may still return a promise within the data field.
+- **Parameters:**
+  - `queryRequest`: An object containing the query type and optional data.
+- **Return Type:** `QueryResponse<AnyValue> | null`
+- **Usage:**  
+  Returns a query response if a valid handler is found, or `null` if no handler exists in the current scope.
+
+
+## Usage Example
+
+Below is an example of creating an authentication manager that stores user information and provides
+methods for state mutations:
 
 ```typescript
 import { ContextManager } from "dreamstate";
@@ -164,7 +226,6 @@ export interface IAuthContext {
 }
 
 export class AuthManager extends ContextManager<IAuthContext> {
-
   public readonly context: IAuthContext = {
     authActions: createActions({
       changeAuthenticationStatus: () => this.changeAuthenticationStatus(),
@@ -181,12 +242,10 @@ export class AuthManager extends ContextManager<IAuthContext> {
   public randomizeUser(): void {
     this.setContext({ user: "user-" + Math.random() });
   }
-
 }
 ```
 
-Then you should provide it with other context managers.
-Do not forget about application-level scope provision.
+To integrate this manager with other context managers, provide it at the application level using Dreamstate's scope:
 
 ```tsx
 import { ScopeProvider, createProvider } from "dreamstate";
@@ -205,7 +264,7 @@ export function ApplicationRoot(): ReactElement {
 }
 ```
 
-For consumption, we should call useManager hook:
+For consuming the context in your components, use the useManager hook:
 
 ```tsx
 import { useManager } from "dreamstate";
